@@ -35,11 +35,8 @@ def main():
 	global unorganized_path
 	global duplicates_path
 	
-	global athletes_hd
-	athletes_hd = []
-	
-	global athletes_ipad
-	athletes_ipad = []
+	global athletes_video_list
+	athletes_video_list = []
 	
 	create_gui()
 			
@@ -63,16 +60,13 @@ def organize_by_athletes():
 	add_info_text("\nOrganizing by Athletes:\n")
 	get_videos_from_path("athletes")
 	update_tree_display()
-	#check_for_all_athletes()
+	check_for_all_athletes()
 	check_if_files_organized()
 
 def check_for_all_athletes():
-	# TODO(lakeky): Update this to look for any files with athletes label name.
 	for athlete in athlete_name_dict:
-		if athlete not in athletes_hd:
-			add_info_text('\tWARNING: No HD videos found for ' + athlete + '\n') 
-		if athlete not in athletes_ipad:
-			add_info_text('\tWARNING: No IPAD videos found for ' + athlete + '\n') 
+		if athlete not in athletes_video_list:
+			add_info_text('\tWARNING: No videos found for ' + athlete + '\n')
 
 def check_if_files_organized():
 	organized = True
@@ -142,10 +136,8 @@ def move_video_file(videos_path, video_file_name, parsing):
 	if athlete_label_name in athlete_name_dict:
 		athletename = athlete_name_dict[athlete_label_name]
 	if athletename in athlete_name_dict:
-		if '_HD_' in video_file_name:
-			athletes_hd.append(athletename)
-		else:
-			athletes_ipad.append(athletename)
+		if athletename not in athletes_video_list:
+			athletes_video_list.append(athletename)
 		new_path = get_athletes_path(path, athletename, video_file_name)
 		
 		if os.path.exists(base_path):
