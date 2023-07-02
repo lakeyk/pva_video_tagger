@@ -1,7 +1,4 @@
 """
-athlete_coach_dict []:
-    key = athlete name
-    value = coach
 athlete_name_dict []:
     key = labeling name
     value = full name
@@ -10,12 +7,11 @@ Looking up video match:
     file name
     remove appending _, .
     get athlete name from labeling name (athlete_name_dict)
-    get coach from full athlete name
     
 How do we define labeling name?
 
 CSV:
-    full name     labeling name     coach   email
+    full name     Optional(labeling name)
 """
 
 #!/usr/bin/env python
@@ -31,17 +27,8 @@ from tkinter import filedialog
 #from pathlib import Path
 
 def main():
-	global athlete_coach_dict
-	athlete_coach_dict = {}
-    
-	global coach_athlete_dict
-	coach_athlete_dict = {}
-    
 	global athlete_name_dict
 	athlete_name_dict = {}
-    
-	global athlete_email_dict
-	athlete_email_dict = {}
 	
 	global path
 	path = "\\"
@@ -56,67 +43,22 @@ def main():
 	
 	create_gui()
 			
-def parse_csv(coaches_path):
-	coaches_tree.delete(*coaches_tree.get_children())
-	coaches_root_node = coaches_tree.insert('', 'end', text="coaches", open=True)
-	
+def parse_csv(file_path):	
 	# Open and parse CSV file
-	csvfile = open(coaches_path)
+	csvfile = open(file_path)
 	for row in csvfile.readlines()[1:]:
 		array = row.split(',')
-		if len(array) < 3 or len(array) > 4:
+		if len(array) < 1:
 			print('row: ' + str(row) + ' formatted incorrectly, len= ' + str(len(array)))
 			return
 		athlete_full_name = array[0]
-		if len(array[1]) == 0:
+		if len(array) > 1: # Use the first name as the label name.
 			athlete_name = athlete_full_name.split()
 			athlete_label_name = athlete_name[0]
 		else:
 			athlete_label_name = array[1]
-		athlete_coach = array[2]
-		if len(array) > 3:
-			athlete_email_dict = array[3]
-		athlete_coach_dict[athlete_full_name] = athlete_coach
-		if athlete_coach in coach_athlete_dict:
-			coach_athlete_dict[athlete_coach].append(athlete_full_name)
-		else:
-			coach_athlete_dict[athlete_coach] = [athlete_full_name]
 		athlete_name_dict[athlete_label_name] = athlete_full_name
-        
-	for coach in coach_athlete_dict:
-		coach_node = coaches_tree.insert(coaches_root_node, 'end', text=coach, open=False)
-		for athlete in coach_athlete_dict[coach]:
-			coaches_tree.insert(coach_node, 'end', text=athlete, open=False)
 
-            
-def parse_coaches_csv(coaches_path):
-	coaches_tree.delete(*coaches_tree.get_children())
-	coaches_root_node = coaches_tree.insert('', 'end', text="coaches", open=True)
-	
-	# Open and parse CSV file
-	csvfile = open(coaches_path)
-	for row in csvfile.readlines():
-		array = row.split(',')
-		coach = array[0]
-		coach_node = coaches_tree.insert(coaches_root_node, 'end', text=coach, open=False)
-	
-		# Create athlete / coach association
-		for col in range (1, len(array)):
-			athlete = array[col]
-			if athlete[0] == ' ':
-				athlete = athlete[1:]
-			if athlete[-1] == '\n':
-				athlete = athlete.rstrip(athlete[-1])
-			athlete_coach_dict[athlete] = coach
-			coaches_tree.insert(coach_node, 'end', text=athlete, open=False)
-
-def organize_by_coaches():
-	add_info_text("\nOrganizing by Coaches:\n")
-	get_videos_from_path("coaches")
-	update_tree_display()
-	#check_for_all_athletes()
-	check_if_files_organized()
-	
 def organize_by_athletes():
 	add_info_text("\nOrganizing by Athletes:\n")
 	get_videos_from_path("athletes")
@@ -125,7 +67,8 @@ def organize_by_athletes():
 	check_if_files_organized()
 
 def check_for_all_athletes():
-	for athlete in athlete_coach_dict:
+	# TODO(lakeky): Update this to look for any files with athletes label name.
+	for athlete in athlete_name_dict:
 		if athlete not in athletes_hd:
 			add_info_text('\tWARNING: No HD videos found for ' + athlete + '\n') 
 		if athlete not in athletes_ipad:
@@ -164,7 +107,6 @@ def get_videos_from_path(parsing):
 				os.rename(os.path.join(r, file), os.path.join(r, new_file_name))
 			if '.MOV' in file:
 				move_video_file(r, file, parsing)
-                #create_sym_link(r, file)
 			
 	# Delete empty folders	
 	for dirpath, _, _ in os.walk(path, topdown=False):
@@ -180,24 +122,12 @@ def get_athletes_path(path, athletename, video_file_name):
 	athletes_path = os.path.join(path, 'athletes')
 	athletes_path = os.path.join(athletes_path, athletename)
 			
-	# Create coaches folders
+	# Create folders
 	if not os.path.exists(athletes_path):
 		os.makedirs(athletes_path)
 				
 	new_path = os.path.join(athletes_path, video_file_name)
 	
-	return new_path
-
-def get_coaches_path(path, athlete_name, video_file_name):
-	coaches_path = os.path.join(path, 'coaches')
-	coaches_path = os.path.join(coaches_path, athlete_coach_dict[athlete_name])
-			
-	# Create coaches folders
-	if not os.path.exists(coaches_path):
-		os.makedirs(coaches_path)
-	
-	new_path = os.path.join(coaches_path, video_file_name)
-    
 	return new_path
 	
 def move_video_file(videos_path, video_file_name, parsing):
@@ -211,7 +141,7 @@ def move_video_file(videos_path, video_file_name, parsing):
 	athletename = None
 	if athlete_label_name in athlete_name_dict:
 		athletename = athlete_name_dict[athlete_label_name]
-	if athletename in athlete_coach_dict:
+	if athletename in athlete_name_dict:
 		if '_HD_' in video_file_name:
 			athletes_hd.append(athletename)
 		else:
@@ -225,10 +155,7 @@ def move_video_file(videos_path, video_file_name, parsing):
 					os.makedirs(duplicates_path)
 				os.rename(base_path, os.path.join(duplicates_path, video_file_name))
 			else:
-				os.rename(base_path, new_path)
-				#os.rename(base_path, athletes_path)
-				#os.symlink(athletes_path, coaches_path)#, athletes_path) #, coaches_path)
-	
+				os.rename(base_path, new_path)	
 	else:		
 		if not os.path.exists(unorganized_path):
 			os.makedirs(unorganized_path)
@@ -279,23 +206,15 @@ def open_folder_dialog():
 		video_folder_text.configure(state='normal')
 		video_folder_text.insert(1.0, path)
 		video_folder_text.configure(state='disabled')
-		
-#def sync_with_dropbox():
-#	dbx_sync = DropboxSync()
-#	if len(dropbox_folder_text.get(1.0,'end-1c')) > 0:
-#		add_info_text("\nSyncing with Dropbox, Please Wait...\n")
-#		dbx_sync.sync(dropbox_folder_text.get(1.0,'end-1c'), #video_folder_text.get(1.0,'end-1c'))
-#		add_info_text("\nDropbox Syncing Complete!\n")
-#	else:
-#		add_info_text("\nPlease Insert Dropbox Folder Name\n")
 
 def open_file_dialog():
-	path_file = filedialog.askopenfilename(initialdir = "\\", title = "Select Coaches File", filetypes = [("csv files","*.csv")])
+	# TODO(lakeyk): Update open location to code directory.
+	path_file = filedialog.askopenfilename(initialdir = "\\", title = "Select Athletes Name File", filetypes = [("csv files","*.csv")])
 	if len(path_file) > 0:
 		parse_csv(path_file)
-		coaches_file_text.configure(state='normal')
-		coaches_file_text.insert(1.0, path_file)
-		coaches_file_text.configure(state='disabled')
+		athletes_file_text.configure(state='normal')
+		athletes_file_text.insert(1.0, path_file)
+		athletes_file_text.configure(state='disabled')
 		
 def update_paths():
 	global unorganized_path
@@ -309,15 +228,15 @@ def create_gui():
 	greeting = tk.Label(text='PVA Video Tagger', font = ('', 20))
 	greeting.grid(row = 0, column = 0, columnspan = 3, pady = 10)
     
-	coaches_file_label = tk.Label(text='Coaches File', font = ('', 12))
-	coaches_file_label.grid(row = 2, column = 0, pady = 10)
+	athletes_file_label = tk.Label(text='Athletes Name File', font = ('', 12))
+	athletes_file_label.grid(row = 2, column = 0, pady = 10)
     
-	global coaches_file_text
-	coaches_file_text = tk.Text(window, height = 1, bg = "white")
-	coaches_file_text.grid(row = 2, column = 1, pady = 10)
-	coaches_file_text.configure(state='disabled')
+	global athletes_file_text
+	athletes_file_text = tk.Text(window, height = 1, bg = "white")
+	athletes_file_text.grid(row = 2, column = 1, pady = 10)
+	athletes_file_text.configure(state='disabled')
     
-	coaches_file_button = tk.Button(
+	athletes_file_button = tk.Button(
 		text="Select",
 		width = 15,
 		height = 1,
@@ -325,7 +244,7 @@ def create_gui():
         fg="yellow",
 		command = open_file_dialog
 	)
-	coaches_file_button.grid(row = 2, column = 2)
+	athletes_file_button.grid(row = 2, column = 2)
 
 	video_folder_label = tk.Label(text='Video Folder', font = ('', 12))
 	video_folder_label.grid(row = 3, column = 0, pady = 10)
@@ -355,16 +274,6 @@ def create_gui():
 	)
 	remove_audio_button.grid(row = 5, column = 1, padx = 10)
 	
-	organize_by_coaches_button = tk.Button(
-		text="Organize By Coaches",
-		width=15,
-		height=1,
-		bg="blue",
-		fg="yellow",
-		command = organize_by_coaches
-	)
-	#organize_by_coaches_button.grid(row = 4, column = 0, padx = 10)
-	
 	organize_by_athletes_button = tk.Button(
 		text="Sort",
 		width=15,
@@ -374,30 +283,6 @@ def create_gui():
 		command = organize_by_athletes
 	)
 	organize_by_athletes_button.grid(row=5, column=0, padx = 20)
-	
-    
-	dropbox_folder_label = tk.Label(text='Dropbox Folder', font = ('', 12))
-	#dropbox_folder_label.grid(row = 4, column = 0, pady = 10)
-    
-	global dropbox_folder_text
-	dropbox_folder_text = tk.Text(window, height = 1, bg = "white")
-	dropbox_folder_text.insert(1.0, "PVA Summer 2022 - Session 2")
-	#dropbox_folder_text.grid(row = 4, column = 1, pady = 10)
-    
-	sync_dropbox_button = tk.Button(
-		text="Sync With Dropbox",
-		width=15,
-		height=1,
-		bg="blue",
-		fg="yellow",
-     #   state= DISABLED
-	#	command = sync_with_dropbox
-	)
-	#sync_dropbox_button.grid(row=4, column=2, padx = 20)
-	
-	global coaches_tree
-	coaches_tree = ttk.Treeview(height = 15)
-	#coaches_tree.grid(row = 4, column = 1, rowspan = 3, pady = 15, padx = 10)
 	
 	global tree
 	tree = ttk.Treeview()#height = 15)
