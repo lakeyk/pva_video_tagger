@@ -22,6 +22,7 @@ import shutil
 import tkinter as tk
 from tkinter import ttk
 from tkinter import filedialog
+import time
 
 def main():
 	global athlete_name_dict
@@ -34,7 +35,7 @@ def main():
 	
 	global athletes_video_list
 	athletes_video_list = []
-	
+
 	create_gui()
 			
 def parse_file(file_path):	
@@ -196,12 +197,28 @@ def open_folder_dialog():
 		video_folder_text.configure(state='disabled')
 
 def open_file_dialog():
-	path_file = filedialog.askopenfilename(initialdir = sys.path[0], title = "Select Athletes Name File", filetypes = [("text files","*.txt")])
-	if len(path_file) > 0:
-		parse_file(path_file)
+	file_path = filedialog.askopenfilename(initialdir = sys.path[0], title = "Select Athletes Name File", filetypes = [("text files","*.txt")])
+	load_athletes_file(file_path)
+	
+def load_athletes_file(file_path):
+	if len(file_path) > 0:
+		parse_file(file_path)
 		athletes_file_text.configure(state='normal')
-		athletes_file_text.insert(1.0, path_file)
+		athletes_file_text.insert(1.0, file_path)
 		athletes_file_text.configure(state='disabled')
+
+def autoload_athletes_file():
+	# Search for latest txt file in current directory
+	crnt_dir = sys.path[0]
+	for p in os.listdir(crnt_dir):
+	    abspath = os.path.join(crnt_dir, p)
+	    if not os.path.isdir(abspath) and p.endswith('.txt') and 'athletes' in p:
+	    	load_athletes_file(abspath)
+	    	try:
+	    		load_athletes_file(abspath)
+	    	except:
+	    		print('Was not able to autoload athletes file: ' + abspath)
+	    	break
 		
 def update_paths():
 	global unorganized_path
@@ -274,6 +291,7 @@ def create_gui():
 	global athletes_tree
 	athletes_tree = ttk.Treeview()
 	global athletes_root_node
+	autoload_athletes_file()
 	athletes_tree.grid(row = 6, column = 0, columnspan = 1, pady = 15, padx = 20, sticky=tk.NSEW)
 
 	global video_tree
@@ -285,7 +303,6 @@ def create_gui():
 	info_text = tk.Text(window, height = 15, bg = "light gray")
 	info_text.grid(row = 9, column = 0, columnspan = 3, pady = 10, padx = 20, sticky=tk.NSEW)
 	scrollb = tk.Scrollbar(window, command = info_text.yview)
-	#scrollb.grid(row = 9, column = 3, sticky = 'nsew', pady = 10)
 	info_text['yscrollcommand'] = scrollb.set
 	
 	window.mainloop()
