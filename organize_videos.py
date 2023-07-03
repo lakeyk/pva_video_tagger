@@ -1,19 +1,3 @@
-"""
-athlete_name_dict []:
-    key = labeling name
-    value = full name
-
-Looking up video match:
-    file name
-    remove appending _, .
-    get athlete name from labeling name (athlete_name_dict)
-    
-How do we define labeling name?
-
-File:
-    full name,     Optional(labeling name)
-"""
-
 #!/usr/bin/env python
 
 import os
@@ -35,6 +19,9 @@ def main():
 	
 	global athletes_video_list
 	athletes_video_list = []
+	
+	global base_path
+	base_path = os.path.abspath(os.path.dirname(__file__))
 
 	create_gui()
 			
@@ -197,7 +184,7 @@ def open_folder_dialog():
 		video_folder_text.configure(state='disabled')
 
 def open_file_dialog():
-	file_path = filedialog.askopenfilename(initialdir = sys.path[0], title = "Select Athletes Name File", filetypes = [("text files","*.txt")])
+	file_path = filedialog.askopenfilename(initialdir = base_path, title = "Select Athletes Name File", filetypes = [("text files","*.txt")])
 	load_athletes_file(file_path)
 	
 def load_athletes_file(file_path):
@@ -209,17 +196,20 @@ def load_athletes_file(file_path):
 
 def autoload_athletes_file():
 	# Search for latest txt file in current directory
-	crnt_dir = sys.path[0]
-	for p in os.listdir(crnt_dir):
-	    abspath = os.path.join(crnt_dir, p)
-	    if not os.path.isdir(abspath) and p.endswith('.txt') and 'athletes' in p:
-	    	load_athletes_file(abspath)
-	    	try:
-	    		load_athletes_file(abspath)
-	    	except:
-	    		print('Was not able to autoload athletes file: ' + abspath)
-	    	break
-		
+	crnt_dir = base_path
+	try:
+		for p in os.listdir(crnt_dir):
+			abspath = os.path.join(crnt_dir, p)
+			if not os.path.isdir(abspath) and p.endswith('.txt') and 'athletes' in p:
+				load_athletes_file(abspath)
+				try:
+					load_athletes_file(abspath)
+				except:
+					print('Was not able to autoload athletes file: ' + abspath)
+				break
+	except:
+		print('Could not load directory: ' + crnt_dir)
+
 def update_paths():
 	global unorganized_path
 	global duplicates_path
