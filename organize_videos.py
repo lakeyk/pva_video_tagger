@@ -197,7 +197,7 @@ def open_folder_dialog():
 
 def open_file_dialog():
 	# TODO(lakeyk): Update open location to code directory.
-	path_file = filedialog.askopenfilename(initialdir = "\\", title = "Select Athletes Name File", filetypes = [("text files","*.txt")])
+	path_file = filedialog.askopenfilename(initialdir = sys.path[0], title = "Select Athletes Name File", filetypes = [("text files","*.txt")])
 	if len(path_file) > 0:
 		parse_file(path_file)
 		athletes_file_text.configure(state='normal')
