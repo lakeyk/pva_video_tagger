@@ -182,6 +182,7 @@ def open_folder_dialog():
 		update_paths()
 		update_video_tree_display()
 		video_folder_text.configure(state='normal')
+		video_folder_text.delete(1.0, tk.END)
 		video_folder_text.insert(1.0, path)
 		video_folder_text.configure(state='disabled')
 
@@ -193,6 +194,7 @@ def load_athletes_file(file_path):
 	if len(file_path) > 0:
 		parse_file(file_path)
 		athletes_file_text.configure(state='normal')
+		athletes_file_text.delete(1.0, tk.END)
 		athletes_file_text.insert(1.0, file_path)
 		athletes_file_text.configure(state='disabled')
 
