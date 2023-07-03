@@ -53,11 +53,12 @@ def parse_file(file_path):
 		else:
 			athlete_label_name = array[1]
 		athlete_name_dict[athlete_label_name.strip()] = athlete_full_name.strip()
+	add_athletes_to_tree()
 
 def organize_by_athletes():
 	add_info_text("\nOrganizing by Athletes:\n")
 	get_videos_from_path("athletes")
-	update_tree_display()
+	update_video_tree_display()
 	check_for_all_athletes()
 	check_if_files_organized()
 
@@ -149,7 +150,6 @@ def move_video_file(videos_path, video_file_name, parsing):
 			os.makedirs(unorganized_path)
 		if os.path.exists(base_path):
 			os.rename(base_path, os.path.join(unorganized_path, video_file_name))
-    
 
 def remove_audio_command():
 	add_info_text("\nRemoving Audio, Please Wait...\n")
@@ -190,7 +190,7 @@ def open_folder_dialog():
 		global path
 		path = path_directory
 		update_paths()
-		update_tree_display()
+		update_video_tree_display()
 		video_folder_text.configure(state='normal')
 		video_folder_text.insert(1.0, path)
 		video_folder_text.configure(state='disabled')
@@ -271,10 +271,15 @@ def create_gui():
 	)
 	organize_by_athletes_button.grid(row=5, column=0, padx = 20)
 	
-	global tree
-	tree = ttk.Treeview()#height = 15)
-	global root_node
-	tree.grid(row = 6, column = 0, columnspan = 3, pady = 15, padx = 20, sticky=tk.NSEW)
+	global athletes_tree
+	athletes_tree = ttk.Treeview()
+	global athletes_root_node
+	athletes_tree.grid(row = 6, column = 0, columnspan = 1, pady = 15, padx = 20, sticky=tk.NSEW)
+
+	global video_tree
+	video_tree = ttk.Treeview()
+	global video_root_node
+	video_tree.grid(row = 6, column = 1, columnspan = 2, pady = 15, padx = 20, sticky=tk.NSEW)
 	
 	global info_text
 	info_text = tk.Text(window, height = 15, bg = "light gray")
@@ -291,17 +296,23 @@ def add_info_text(comment):
 	info_text.see(tk.END)
 	info_text.configure(state='disabled')
 	
-def update_tree_display():
-	tree.delete(*tree.get_children())
-	root_node = tree.insert('', 'end', text=path, open=True)
-	process_directory(root_node, path)	
+def update_video_tree_display():
+	video_tree.delete(*video_tree.get_children())
+	video_root_node = video_tree.insert('', 'end', text=path, open=True)
+	process_directory(video_root_node, path)
+
+def add_athletes_to_tree():
+	athletes_tree.delete(*athletes_tree.get_children())
+	athletes_root_node = athletes_tree.insert('', 'end', text='Full Name, Label Name', open=True)
+	for athlete in athlete_name_dict:
+		athletes_tree.insert(athletes_root_node, 'end', text=athlete_name_dict[athlete] + ', ' + athlete, open=False)
 
 def process_directory(parent, path):
         for p in os.listdir(path):
             abspath = os.path.join(path, p)
             isdir = os.path.isdir(abspath)
             if not p.startswith('.'):
-            	oid = tree.insert(parent, 'end', text=p, open=False)
+                oid = video_tree.insert(parent, 'end', text=p, open=False)
             if isdir:
                 process_directory(oid, abspath)
 
