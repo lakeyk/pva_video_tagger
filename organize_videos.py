@@ -27,6 +27,7 @@ def main():
 			
 def parse_file(file_path):	
 	# Open and parse athletes file
+	athlete_name_dict.clear()
 	file = open(file_path)
 	for row in file.readlines()[1:]:
 		row = row.rstrip('\n')
@@ -44,6 +45,7 @@ def parse_file(file_path):
 	add_athletes_to_tree()
 
 def organize_by_athletes():
+	athletes_video_list.clear()
 	add_info_text("\nOrganizing by Athletes:\n")
 	get_videos_from_path("athletes")
 	update_video_tree_display()
@@ -201,7 +203,6 @@ def autoload_athletes_file():
 		for p in os.listdir(crnt_dir):
 			abspath = os.path.join(crnt_dir, p)
 			if not os.path.isdir(abspath) and p.endswith('.txt') and 'athletes' in p:
-				load_athletes_file(abspath)
 				try:
 					load_athletes_file(abspath)
 				except:
