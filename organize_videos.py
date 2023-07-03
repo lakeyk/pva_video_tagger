@@ -10,13 +10,12 @@ Looking up video match:
     
 How do we define labeling name?
 
-CSV:
-    full name     Optional(labeling name)
+File:
+    full name,     Optional(labeling name)
 """
 
 #!/usr/bin/env python
 
-import csv 
 import os
 import sys
 import shutil
@@ -40,10 +39,10 @@ def main():
 	
 	create_gui()
 			
-def parse_csv(file_path):	
-	# Open and parse CSV file
-	csvfile = open(file_path)
-	for row in csvfile.readlines()[1:]:
+def parse_file(file_path):	
+	# Open and parse athletes file
+	file = open(file_path)
+	for row in file.readlines()[1:]:
 		row = row.rstrip('\n')
 		array = row.split(',')
 		if len(array) < 1:
@@ -200,9 +199,9 @@ def open_folder_dialog():
 
 def open_file_dialog():
 	# TODO(lakeyk): Update open location to code directory.
-	path_file = filedialog.askopenfilename(initialdir = "\\", title = "Select Athletes Name File", filetypes = [("csv files","*.csv")])
+	path_file = filedialog.askopenfilename(initialdir = "\\", title = "Select Athletes Name File", filetypes = [("text files","*.txt")])
 	if len(path_file) > 0:
-		parse_csv(path_file)
+		parse_file(path_file)
 		athletes_file_text.configure(state='normal')
 		athletes_file_text.insert(1.0, path_file)
 		athletes_file_text.configure(state='disabled')
