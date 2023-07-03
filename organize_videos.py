@@ -55,7 +55,7 @@ def parse_csv(file_path):
 			athlete_label_name = athlete_name[0]
 		else:
 			athlete_label_name = array[1]
-		athlete_name_dict[athlete_label_name] = athlete_full_name
+		athlete_name_dict[athlete_label_name.strip()] = athlete_full_name.strip()
 
 def organize_by_athletes():
 	add_info_text("\nOrganizing by Athletes:\n")
