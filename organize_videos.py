@@ -44,12 +44,13 @@ def parse_csv(file_path):
 	# Open and parse CSV file
 	csvfile = open(file_path)
 	for row in csvfile.readlines()[1:]:
+		row = row.rstrip('\n')
 		array = row.split(',')
 		if len(array) < 1:
 			print('row: ' + str(row) + ' formatted incorrectly, len= ' + str(len(array)))
 			return
 		athlete_full_name = array[0]
-		if len(array) > 1: # Use the first name as the label name.
+		if len(array) < 2: # Use the first name as the label name.
 			athlete_name = athlete_full_name.split()
 			athlete_label_name = athlete_name[0]
 		else:
@@ -130,14 +131,12 @@ def move_video_file(videos_path, video_file_name, parsing):
 		if video_file_name[i] == '.' or video_file_name[i] == '_':
 			athlete_label_name = video_file_name[0:i]
 			break
-	
 	base_path = os.path.join(videos_path, video_file_name)
 	athletename = None
 	if athlete_label_name in athlete_name_dict:
 		athletename = athlete_name_dict[athlete_label_name]
-	if athletename in athlete_name_dict:
-		if athletename not in athletes_video_list:
-			athletes_video_list.append(athletename)
+		if athlete_label_name not in athletes_video_list:
+			athletes_video_list.append(athlete_label_name)
 		new_path = get_athletes_path(path, athletename, video_file_name)
 		
 		if os.path.exists(base_path):
