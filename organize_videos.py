@@ -22,8 +22,6 @@ import shutil
 import tkinter as tk
 from tkinter import ttk
 from tkinter import filedialog
-#from dropboxSync import DropboxSync
-#from pathlib import Path
 
 def main():
 	global athlete_name_dict
