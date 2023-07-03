@@ -196,7 +196,6 @@ def open_folder_dialog():
 		video_folder_text.configure(state='disabled')
 
 def open_file_dialog():
-	# TODO(lakeyk): Update open location to code directory.
 	path_file = filedialog.askopenfilename(initialdir = sys.path[0], title = "Select Athletes Name File", filetypes = [("text files","*.txt")])
 	if len(path_file) > 0:
 		parse_file(path_file)
