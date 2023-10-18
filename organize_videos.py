@@ -24,28 +24,30 @@ def main():
 	base_path = os.path.abspath(os.path.dirname(__file__))
 
 	create_gui()
-			
-def parse_file(file_path):	
+
+def add_athlete_row(row):
+	row = row.rstrip('\n')
+	array = row.split(',')
+	if len(array) < 1:
+		print('row: ' + str(row) + ' formatted incorrectly, len= ' + str(len(array)))
+		return
+	athlete_full_name = array[0]
+	if len(array) < 2: # Use the first name as the label name.
+		athlete_name = athlete_full_name.split()
+		athlete_label_name = athlete_name[0]
+	else:
+		athlete_label_name = array[1]
+	athlete_name_dict[athlete_label_name.strip()] = athlete_full_name.strip()    
+
+def parse_file(file_path):
 	# Open and parse athletes file
 	athlete_name_dict.clear()
 	file = open(file_path)
 	for row in file.readlines()[1:]:
-		row = row.rstrip('\n')
-		array = row.split(',')
-		if len(array) < 1:
-			print('row: ' + str(row) + ' formatted incorrectly, len= ' + str(len(array)))
-			return
-		athlete_full_name = array[0]
-		if len(array) < 2: # Use the first name as the label name.
-			athlete_name = athlete_full_name.split()
-			athlete_label_name = athlete_name[0]
-		else:
-			athlete_label_name = array[1]
-		athlete_name_dict[athlete_label_name.strip()] = athlete_full_name.strip()
+		add_athlete_row(row)
 	add_athletes_to_tree()
 
 def organize_by_athletes():
-	athletes_video_list.clear()
 	add_info_text("\nOrganizing by Athletes:\n")
 	get_videos_from_path("athletes")
 	update_video_tree_display()
@@ -223,7 +225,7 @@ def create_gui():
 	global window
 	window = tk.Tk()
 	greeting = tk.Label(text='PVA Video Tagger', font = ('', 20))
-	greeting.grid(row = 0, column = 0, columnspan = 3, pady = 10)
+	greeting.grid(row = 0, column = 0, columnspan = 4, pady = 10)
     
 	athletes_file_label = tk.Label(text='Athletes Name File', font = ('', 12))
 	athletes_file_label.grid(row = 2, column = 0, pady = 10)
@@ -260,7 +262,17 @@ def create_gui():
 		command = open_folder_dialog
 	)
 	path_button.grid(row = 3, column = 2, padx=20)
-	
+
+	edit_athletes_button = tk.Button(
+		text="Edit Athletes",
+		width=15,
+		height=1,
+		bg="blue",
+		fg="yellow",
+		command = edit_athletes
+	)
+	edit_athletes_button.grid(row = 7, column = 0, padx = 10)
+    
 	remove_audio_button = tk.Button(
 		text="Remove Audio",
 		width=15,
@@ -269,7 +281,7 @@ def create_gui():
 		fg="yellow",
 		command = remove_audio_command
 	)
-	remove_audio_button.grid(row = 5, column = 1, padx = 10)
+	remove_audio_button.grid(row = 7, column = 2, padx = 10)
 	
 	organize_by_athletes_button = tk.Button(
 		text="Sort",
@@ -279,7 +291,7 @@ def create_gui():
 		fg="yellow",
 		command = organize_by_athletes
 	)
-	organize_by_athletes_button.grid(row=5, column=0, padx = 20)
+	organize_by_athletes_button.grid(row=7, column=1, padx = 20)
 	
 	global athletes_tree
 	athletes_tree = ttk.Treeview()
@@ -325,6 +337,44 @@ def process_directory(parent, path):
                 oid = video_tree.insert(parent, 'end', text=p, open=False)
             if isdir:
                 process_directory(oid, abspath)
+
+# TODO: Use this for all text box entries
+def add_text(text_box, comment):
+	text_box.configure(state='normal')
+	text_box.insert(tk.END, comment)
+	text_box.see(tk.END)
+
+def save_athletes(top, text_box):
+	text = text_box.get('1.0', tk.END).splitlines()
+	athlete_name_dict.clear()
+	for line in text:
+		add_athlete_row(line)
+		add_info_text(line + '\n')
+    # TODO: Add a verify check and then write out to file
+	add_athletes_to_tree()
+	top.destroy()
+
+def edit_athletes():
+	top = tk.Toplevel(window)
+	top.geometry("750x250")
+	top.title("Athletes List")
+	athletes_edit_text = tk.Text(top, height = 10, bg = "light gray")
+	athletes_edit_text.grid(row = 0, column = 0, columnspan = 3, pady = 10, padx = 20, sticky=tk.NSEW)
+	scrollb = tk.Scrollbar(top, command = athletes_edit_text.yview)
+	athletes_edit_text['yscrollcommand'] = scrollb.set
+	save_button = tk.Button(
+        top,
+		text="Save",
+		width=15,
+		height=1,
+		bg="blue",
+		fg="yellow",
+		command = lambda: save_athletes(top, athletes_edit_text)
+	)
+	save_button.grid(row=1, column=2, padx = 20)
+	for athlete in athlete_name_dict:
+		add_text(athletes_edit_text, athlete_name_dict[athlete] + ', ' + athlete + '\n')
+		add_info_text(athlete_name_dict[athlete] + ', ' + athlete + '\n')
 
 if __name__ == "__main__":
 	main()
