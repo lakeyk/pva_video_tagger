@@ -7,6 +7,7 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import filedialog
 import time
+import glob
 
 def main():
 	global athlete_name_dict
@@ -204,13 +205,14 @@ def autoload_athletes_file():
 	# Search for latest txt file in current directory
 	crnt_dir = base_path
 	try:
-		for p in os.listdir(crnt_dir):
-			abspath = os.path.join(crnt_dir, p)
-			if not os.path.isdir(abspath) and p.endswith('.txt') and 'athletes' in p:
+		files = list(filter(os.path.isfile, glob.glob(crnt_dir + "\*")))
+		files.sort(key=os.path.getctime)
+		for p in reversed(files):
+			if not os.path.isdir(p) and p.endswith('.txt') and 'athletes' in p:
 				try:
-					load_athletes_file(abspath)
+					load_athletes_file(p)
 				except:
-					print('Was not able to autoload athletes file: ' + abspath)
+					print('Was not able to autoload athletes file: ' + p)
 				break
 	except:
 		print('Could not load directory: ' + crnt_dir)
