@@ -28,8 +28,8 @@ def main():
 def add_athlete_row(row):
 	row = row.rstrip('\n')
 	array = row.split(',')
-	if len(array) < 1:
-		print('row: ' + str(row) + ' formatted incorrectly, len= ' + str(len(array)))
+	if len(array) < 1 or len(array[0]) < 1:
+		print('row: ' + str(row) + ' formatted incorrectly, athlete not added')
 		return
 	athlete_full_name = array[0]
 	if len(array) < 2: # Use the first name as the label name.
@@ -344,13 +344,22 @@ def add_text(text_box, comment):
 	text_box.insert(tk.END, comment)
 	text_box.see(tk.END)
 
+def write_athlets_to_csv():
+    path = athletes_file_text.get("1.0", tk.END)
+    updated_file_path = path.split('.txt')[0] + '_' + str(int(time.time())) + '.txt'
+    file = open(updated_file_path, "w")
+    file.write("Athlete Name, Label Name\n")
+    for athlete in athlete_name_dict:
+        file.write(athlete_name_dict[athlete] + ', ' + athlete + '\n')
+    file.close()
+
 def save_athletes(top, text_box):
 	text = text_box.get('1.0', tk.END).splitlines()
 	athlete_name_dict.clear()
 	for line in text:
 		add_athlete_row(line)
 		add_info_text(line + '\n')
-    # TODO: Add a verify check and then write out to file
+	write_athlets_to_csv()
 	add_athletes_to_tree()
 	top.destroy()
 
