@@ -46,10 +46,9 @@ def parse_file(file_path):
 	file = open(file_path)
 	for row in file.readlines()[1:]:
 		add_athlete_row(row)
-	add_athletes_to_tree()
 
 def organize_by_athletes():
-	add_info_text("\nOrganizing by Athletes:\n")
+	add_text(info_text, "\nOrganizing by Athletes:\n")
 	get_videos_from_path("athletes")
 	update_video_tree_display()
 	check_for_all_athletes()
@@ -58,7 +57,7 @@ def organize_by_athletes():
 def check_for_all_athletes():
 	for athlete in athlete_name_dict:
 		if athlete not in athletes_video_list:
-			add_info_text('\tWARNING: No videos found for ' + athlete + '\n')
+			add_text(info_text, '\tWARNING: No videos found for ' + athlete + '\n')
 
 def check_if_files_organized():
 	organized = True
@@ -66,18 +65,18 @@ def check_if_files_organized():
 		dirs = os.listdir(unorganized_path)
 		organized = False
 		if len(dirs) == 1:
-			add_info_text('\nWARNING: ' + str(len(dirs)) + ' video left to move, check Unorganized folder\n')
+			add_text(info_text, '\nWARNING: ' + str(len(dirs)) + ' video left to move, check Unorganized folder\n')
 		else:
-			add_info_text('\nWARNING: ' + str(len(dirs)) + ' videos left to move, check Unorganized folder\n')
+			add_text(info_text, '\nWARNING: ' + str(len(dirs)) + ' videos left to move, check Unorganized folder\n')
 	if os.path.exists(duplicates_path):
 		dirs = os.listdir(duplicates_path)
 		organized = False
 		if len(dirs) == 1:
-			add_info_text('\nWARNING: ' + str(len(dirs)) + ' potential duplicate, check Duplicates folder\n')
+			add_text(info_text, '\nWARNING: ' + str(len(dirs)) + ' potential duplicate, check Duplicates folder\n')
 		else:
-			add_info_text('\nWARNING: ' + str(len(dirs)) + ' potential duplicates, check Duplicates folder\n')
+			add_text(info_text, '\nWARNING: ' + str(len(dirs)) + ' potential duplicates, check Duplicates folder\n')
 	if organized:
-		add_info_text('\nAll videos successfully organized!\n')
+		add_text(info_text, '\nAll videos successfully organized!\n')
 			
 def get_videos_from_path(parsing):
 	# Move video files
@@ -145,7 +144,7 @@ def move_video_file(videos_path, video_file_name, parsing):
 			os.rename(base_path, os.path.join(unorganized_path, video_file_name))
 
 def remove_audio_command():
-	add_info_text("\nRemoving Audio, Please Wait...\n")
+	add_text(info_text, "\nRemoving Audio, Please Wait...\n")
 	window.after(1000, lambda:remove_videos_audio_from_path())
 	
 def remove_videos_audio_from_path():	
@@ -155,7 +154,7 @@ def remove_videos_audio_from_path():
 				remove_audio(r, file, '.MP4')
 			if '.MOV' in file:
 				remove_audio(r, file, '.MOV')
-	add_info_text("\nAll Audio Has Been Removed!\n")
+	add_text(info_text, "\nAll Audio Has Been Removed!\n")
 
 def remove_audio(videos_path, video_file_name, extension):
 	if video_file_name[-4:] == extension:
@@ -196,6 +195,7 @@ def open_file_dialog():
 def load_athletes_file(file_path):
 	if len(file_path) > 0:
 		parse_file(file_path)
+		add_athletes_to_tree()
 		athletes_file_text.configure(state='normal')
 		athletes_file_text.delete(1.0, tk.END)
 		athletes_file_text.insert(1.0, file_path)
@@ -314,12 +314,6 @@ def create_gui():
 	
 	window.mainloop()
 	
-def add_info_text(comment):
-	info_text.configure(state='normal')
-	info_text.insert(tk.END, comment)
-	info_text.see(tk.END)
-	info_text.configure(state='disabled')
-	
 def update_video_tree_display():
 	video_tree.delete(*video_tree.get_children())
 	video_root_node = video_tree.insert('', 'end', text=path, open=True)
@@ -340,11 +334,13 @@ def process_directory(parent, path):
             if isdir:
                 process_directory(oid, abspath)
 
-# TODO: Use this for all text box entries
-def add_text(text_box, comment):
+def add_text(text_box, comment, disable = True):
 	text_box.configure(state='normal')
 	text_box.insert(tk.END, comment)
 	text_box.see(tk.END)
+	if disable:
+		print('Disable')
+		text_box.configure(state='disabled')
 
 def write_athlets_to_csv():
     path = athletes_file_text.get("1.0", tk.END)
@@ -360,7 +356,7 @@ def save_athletes(top, text_box):
 	athlete_name_dict.clear()
 	for line in text:
 		add_athlete_row(line)
-		add_info_text(line + '\n')
+		add_text(info_text, line + '\n')
 	write_athlets_to_csv()
 	add_athletes_to_tree()
 	top.destroy()
@@ -384,8 +380,7 @@ def edit_athletes():
 	)
 	save_button.grid(row=1, column=2, padx = 20)
 	for athlete in athlete_name_dict:
-		add_text(athletes_edit_text, athlete_name_dict[athlete] + ', ' + athlete + '\n')
-		add_info_text(athlete_name_dict[athlete] + ', ' + athlete + '\n')
+		add_text(athletes_edit_text, athlete_name_dict[athlete] + ', ' + athlete + '\n', False)
 
 if __name__ == "__main__":
 	main()
