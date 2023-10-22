@@ -2,8 +2,7 @@
 
 import os
 import sys
-sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
-from frontend import simple_gui
+from video_coder import simple_gui
 
 def main():
 	simple_gui.create_gui()
