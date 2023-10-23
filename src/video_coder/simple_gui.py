@@ -10,7 +10,7 @@ from video_coder import file_utils, audio_utils
 
 def remove_audio_command():
 	add_text(info_text, "\nRemoving Audio, Please Wait...\n")
-	window.after(1000, lambda:audio_utils.remove_videos_audio_from_path(video_folder_text.get("1.0", tk.END).rstrip('\n')))
+	window.after(1000, audio_utils.remove_videos_audio_from_path(video_folder_text.get("1.0", tk.END).rstrip('\n')))
 	add_text(info_text, "\nAll Audio Has Been Removed!\n")
 
 def open_folder_dialog():
