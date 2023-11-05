@@ -71,8 +71,8 @@ def create_gui():
 		text="Select",
 		width = 15,
 		height = 1,
-		bg = "blue",
-        fg="yellow",
+		bg = "gray",
+	        fg="black",
 		command = open_file_dialog
 	)
 	athletes_file_button.grid(row = 2, column = 2)
@@ -89,8 +89,8 @@ def create_gui():
 		text="Select",
 		width = 15,
 		height = 1,
-		bg = "blue",
-        fg="yellow",
+		bg = "gray",
+        	fg="black",
 		command = open_folder_dialog
 	)
 	path_button.grid(row = 3, column = 2, padx=20)
@@ -99,8 +99,8 @@ def create_gui():
 		text="Edit Athletes",
 		width=15,
 		height=1,
-		bg="blue",
-		fg="yellow",
+		bg="gray",
+		fg="black",
 		command = edit_athletes
 	)
 	edit_athletes_button.grid(row = 7, column = 0, padx = 10)
@@ -109,8 +109,8 @@ def create_gui():
 		text="Remove Audio",
 		width=15,
 		height=1,
-		bg="blue",
-		fg="yellow",
+		bg="gray",
+		fg="black",
 		command = remove_audio_command
 	)
 	remove_audio_button.grid(row = 7, column = 2, padx = 10)
@@ -119,8 +119,8 @@ def create_gui():
 		text="Sort",
 		width=15,
 		height=1,
-		bg="blue",
-		fg="yellow",
+		bg="gray",
+		fg="black",
 		command = organize_by_athletes
 	)
 	organize_by_athletes_button.grid(row=7, column=1, padx = 20)
@@ -193,8 +193,8 @@ def edit_athletes():
 		text="Save",
 		width=15,
 		height=1,
-		bg="blue",
-		fg="yellow",
+		bg="gray",
+		fg="black",
 		command = lambda: save_athletes_command(top, athletes_edit_text)
 	)
 	save_button.grid(row=1, column=2, padx = 20)
