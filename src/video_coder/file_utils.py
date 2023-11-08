@@ -67,8 +67,8 @@ def check_if_unorganized():
 
 def check_if_duplicates():
 	if os.path.exists(duplicates_path):
-		return False
-	return True
+		return True
+	return False
 
 def get_athletes_path(path, athletename, video_file_name):
 	athletes_path = os.path.join(path, 'athletes')
