@@ -7,11 +7,29 @@ from tkinter import ttk
 from tkinter import filedialog
 import glob
 from video_coder import file_utils, audio_utils
+from threading import Thread, Lock
+
+def remove_videos_audio_from_path(path):
+	add_text(info_text, "\nRemoving Audio, Please Wait...\n\n")
+
+	for r, d, f in os.walk(path):
+		for file in f:
+			extension = None
+			if file[-4:] == '.MP4' or file[-4:] == '.mp4':
+				extension = ".mp4"
+			elif file[-4:] == '.MOV' or file[-4:] == '.mov':
+				extension = ".MOV"
+
+			if extension is not None:
+				add_text(info_text, f"Removing audio from {file}\n")
+				audio_utils.remove_audio(r, file, extension)
+
+	add_text(info_text, "\nAll Audio Has Been Removed!\n")
 
 def remove_audio_command():
-	add_text(info_text, "\nRemoving Audio, Please Wait...\n")
-	window.after(1000, audio_utils.remove_videos_audio_from_path(video_folder_text.get("1.0", tk.END).rstrip('\n')))
-	add_text(info_text, "\nAll Audio Has Been Removed!\n")
+    path = video_folder_text.get("1.0", tk.END).rstrip('\n')
+    thread = Thread(target=lambda: remove_videos_audio_from_path(path))
+    thread.start()
 
 def open_folder_dialog():
 	path_directory = filedialog.askdirectory(initialdir = "\\", title = "Select Video Folder")
@@ -111,7 +129,7 @@ def create_gui():
 		height=1,
 		bg="gray",
 		fg="black",
-		command = remove_audio_command
+		command=lambda: remove_audio_command()
 	)
 	remove_audio_button.grid(row = 7, column = 2, padx = 10)
 	
