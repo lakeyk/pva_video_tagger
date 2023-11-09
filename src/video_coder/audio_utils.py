@@ -2,9 +2,11 @@ import os
 from threading import Thread, Lock
 import ffmpeg
 
+SUPPORTED_EXTENSIONS = [".mp4", ".MP4", ".MOV", ".mov"]
 
-def remove_audio(videos_path, video_file_name, extension):
-	if video_file_name[-4:].upper() == extension.upper():
+def remove_audio(videos_path, video_file_name):
+	if video_file_name[-4:] in SUPPORTED_EXTENSIONS:
+		extension = video_file_name[-4:]
 		base_path = os.path.join(videos_path, video_file_name)
 		if video_file_name[-10:] == '_audio' + extension:
 			video_file_name = video_file_name[:-10] + extension

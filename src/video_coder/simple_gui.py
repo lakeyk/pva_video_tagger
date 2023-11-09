@@ -12,17 +12,18 @@ from threading import Thread, Lock
 def remove_videos_audio_from_path(path):
 	add_text(info_text, "\nRemoving Audio, Please Wait...\n\n")
 
+	video_files = []
 	for r, d, f in os.walk(path):
 		for file in f:
 			extension = None
-			if file[-4:] == '.MP4' or file[-4:] == '.mp4':
-				extension = ".mp4"
-			elif file[-4:] == '.MOV' or file[-4:] == '.mov':
-				extension = ".MOV"
+			if file[-4:] in audio_utils.SUPPORTED_EXTENSIONS:
+				video_files.append((r, file))
 
-			if extension is not None:
-				add_text(info_text, f"Removing audio from {file}\n")
-				audio_utils.remove_audio(r, file, extension)
+	file_count = len(video_files)
+	add_text(info_text, f"Removing audio from {file_count} files\n")
+	for i in range(file_count):
+		add_text(info_text, f"{i+1}/{file_count}: {video_files[i][0]}/{video_files[i][1]}\n")
+		audio_utils.remove_audio(video_files[i][0], video_files[i][1])
 
 	add_text(info_text, "\nAll Audio Has Been Removed!\n")
 
