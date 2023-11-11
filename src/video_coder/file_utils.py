@@ -5,6 +5,9 @@ import glob
 athlete_name_dict = {}
 athletes_video_list = []
 
+def get_athlete_name_dict():
+    return athlete_name_dict
+
 def add_athlete_row(row):
 	row = row.rstrip('\n')
 	array = row.split(',')
@@ -35,12 +38,12 @@ def get_videos_from_path(parsing):
 			if '_audio.MP4' in file:
 				new_file_name = file[0:-10] + '.MP4'
 				os.rename(os.path.join(r, file), os.path.join(r, new_file_name))
-			if '.MP4' in file:
+			if '.MP4' in file or '.mp4' in file:
 				move_video_file(r, file, parsing)
 			if '_audio.MOV' in file:
 				new_file_name = file[0:-10] + '.MOV'
 				os.rename(os.path.join(r, file), os.path.join(r, new_file_name))
-			if '.MOV' in file:
+			if '.MOV' in file or '.mov' in file:
 				move_video_file(r, file, parsing)
 			
 	# Delete empty folders	
@@ -120,6 +123,7 @@ def update_paths(path):
 
 def write_athlets_to_csv(path):
     updated_file_path = path.split('.txt')[0] + '_' + str(int(time.time())) + '.txt'
+    updated_file_path = updated_file_path.replace('\n',"")
     file = open(updated_file_path, "w")
     file.write("Athlete Name, Label Name\n")
     for athlete in athlete_name_dict:

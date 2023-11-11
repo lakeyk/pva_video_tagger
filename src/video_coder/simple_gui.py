@@ -9,15 +9,19 @@ import glob
 from video_coder import file_utils, audio_utils
 from threading import Thread, Lock
 
-def remove_videos_audio_from_path(path):
-	add_text(info_text, "\nRemoving Audio, Please Wait...\n\n")
-
+def get_video_files(path):
 	video_files = []
 	for r, d, f in os.walk(path):
 		for file in f:
 			extension = None
 			if file[-4:] in audio_utils.SUPPORTED_EXTENSIONS:
 				video_files.append((r, file))
+	return video_files
+
+def remove_videos_audio_from_path(path):
+	add_text(info_text, "\nRemoving Audio, Please Wait...\n\n")
+
+	video_files = get_video_files(path)
 
 	file_count = len(video_files)
 	add_text(info_text, f"Removing audio from {file_count} files\n")
@@ -30,6 +34,26 @@ def remove_videos_audio_from_path(path):
 def remove_audio_command():
     path = video_folder_text.get("1.0", tk.END).rstrip('\n')
     thread = Thread(target=lambda: remove_videos_audio_from_path(path))
+    thread.start()
+
+def run_auto_tagger_on_path(path):
+	add_text(info_text, "\nRunning auto-tagger, Please Wait...\n\n")
+	athletes_name_dict = file_utils.get_athlete_name_dict()
+	print(athletes_name_dict)
+	video_files = get_video_files(path)
+
+	file_count = len(video_files)
+	add_text(info_text, f"Auto-tagging {file_count} files\n")
+	for i in range(file_count):
+		add_text(info_text, f"{i+1}/{file_count}: {video_files[i][0]}/{video_files[i][1]}\n")
+		result = audio_utils.autotag_file(video_files[i][0], video_files[i][1], athletes_name_dict)
+		add_text(info_text, f"\tAuto-tagged as: {result}\n")
+
+	add_text(info_text, "\nAuto-tagger complete for all files!\n")
+
+def auto_tag_command():
+    path = video_folder_text.get("1.0", tk.END).rstrip('\n')
+    thread = Thread(target=lambda: run_auto_tagger_on_path(path))
     thread.start()
 
 def open_folder_dialog():
@@ -47,7 +71,7 @@ def open_folder_dialog():
 
 def open_file_dialog():
 	base_path = os.path.abspath(os.path.dirname(__file__))
-	file_path = filedialog.askopenfilename(initialdir = base_path, title = "Select Athletes Name File", filetypes = [("text files","*.txt")])
+	file_path = filedialog.askopenfilename(initialdir = base_path, title = "Select Athletes Name File", filetypes = [("text file","*.txt")])
 	load_athletes_file(file_path)
 	
 def load_athletes_file(file_path):
@@ -76,14 +100,14 @@ def create_gui():
 	global window
 	window = tk.Tk()
 	greeting = tk.Label(text='PVA Video Tagger', font = ('', 20))
-	greeting.grid(row = 0, column = 0, columnspan = 4, pady = 10)
+	greeting.grid(row = 0, column = 0, columnspan = 5, pady = 10)
     
 	athletes_file_label = tk.Label(text='Athletes Name File', font = ('', 12))
 	athletes_file_label.grid(row = 2, column = 0, pady = 10)
     
 	global athletes_file_text
 	athletes_file_text = tk.Text(window, height = 1, bg = "white")
-	athletes_file_text.grid(row = 2, column = 1, pady = 10)
+	athletes_file_text.grid(row = 2, column = 1, columnspan = 2, pady = 10)
 	athletes_file_text.configure(state='disabled')
     
 	athletes_file_button = tk.Button(
@@ -94,14 +118,14 @@ def create_gui():
 	        fg="black",
 		command = open_file_dialog
 	)
-	athletes_file_button.grid(row = 2, column = 2)
+	athletes_file_button.grid(row = 2, column = 3)
 
 	video_folder_label = tk.Label(text='Video Folder', font = ('', 12))
 	video_folder_label.grid(row = 3, column = 0, pady = 10)
 
 	global video_folder_text
 	video_folder_text = tk.Text(window, height = 1, bg = "white")
-	video_folder_text.grid(row = 3, column = 1, pady = 10)
+	video_folder_text.grid(row = 3, column = 1, columnspan = 2, pady = 10)
 	video_folder_text.configure(state='disabled')
     
 	path_button = tk.Button(
@@ -112,7 +136,7 @@ def create_gui():
         	fg="black",
 		command = open_folder_dialog
 	)
-	path_button.grid(row = 3, column = 2, padx=20)
+	path_button.grid(row = 3, column = 3, padx=20)
 
 	edit_athletes_button = tk.Button(
 		text="Edit Athletes",
@@ -132,7 +156,7 @@ def create_gui():
 		fg="black",
 		command=lambda: remove_audio_command()
 	)
-	remove_audio_button.grid(row = 7, column = 2, padx = 10)
+	remove_audio_button.grid(row = 7, column = 3, padx = 10)
 	
 	organize_by_athletes_button = tk.Button(
 		text="Sort",
@@ -142,7 +166,17 @@ def create_gui():
 		fg="black",
 		command = organize_by_athletes
 	)
-	organize_by_athletes_button.grid(row=7, column=1, padx = 20)
+	organize_by_athletes_button.grid(row=7, column=2, padx = 20)
+
+	auto_tag_button = tk.Button(
+		text="AutoTag",
+		width=15,
+		height=1,
+		bg="gray",
+		fg="black",
+		command = lambda: auto_tag_command()
+	)
+	auto_tag_button.grid(row=7, column=1, padx = 20)
 	
 	global athletes_tree
 	athletes_tree = ttk.Treeview()
@@ -153,11 +187,11 @@ def create_gui():
 	global video_tree
 	video_tree = ttk.Treeview()
 	global video_root_node
-	video_tree.grid(row = 6, column = 1, columnspan = 2, pady = 15, padx = 20, sticky=tk.NSEW)
+	video_tree.grid(row = 6, column = 1, columnspan = 3, pady = 15, padx = 20, sticky=tk.NSEW)
 	
 	global info_text
 	info_text = tk.Text(window, height = 15, bg = "light gray")
-	info_text.grid(row = 9, column = 0, columnspan = 3, pady = 10, padx = 20, sticky=tk.NSEW)
+	info_text.grid(row = 9, column = 0, columnspan = 4, pady = 10, padx = 20, sticky=tk.NSEW)
 	scrollb = tk.Scrollbar(window, command = info_text.yview)
 	info_text['yscrollcommand'] = scrollb.set
 	
