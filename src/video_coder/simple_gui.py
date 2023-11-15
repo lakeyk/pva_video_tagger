@@ -38,15 +38,13 @@ def remove_audio_command():
 
 def run_auto_tagger_on_path(path):
 	add_text(info_text, "\nRunning auto-tagger, Please Wait...\n\n")
-	athletes_name_dict = file_utils.get_athlete_name_dict()
-	print(athletes_name_dict)
 	video_files = get_video_files(path)
 
 	file_count = len(video_files)
 	add_text(info_text, f"Auto-tagging {file_count} files\n")
 	for i in range(file_count):
 		add_text(info_text, f"{i+1}/{file_count}: {video_files[i][0]}/{video_files[i][1]}\n")
-		result = audio_utils.autotag_file(video_files[i][0], video_files[i][1], athletes_name_dict)
+		result = audio_utils.autotag_file(video_files[i][0], video_files[i][1])
 		add_text(info_text, f"\tAuto-tagged as: {result}\n")
 
 	add_text(info_text, "\nAuto-tagger complete for all files!\n")
