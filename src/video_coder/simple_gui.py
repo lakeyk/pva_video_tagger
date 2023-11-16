@@ -46,8 +46,8 @@ def run_auto_tagger_on_path(path):
 		add_text(info_text, f"{i+1}/{file_count}: {video_files[i][0]}/{video_files[i][1]}\n")
 		result = audio_utils.autotag_file(video_files[i][0], video_files[i][1])
 		add_text(info_text, f"\tAuto-tagged as: {result}\n")
-
 	add_text(info_text, "\nAuto-tagger complete for all files!\n")
+	update_video_tree_display(video_folder_text.get("1.0", tk.END).rstrip('\n'))
 
 def auto_tag_command():
     path = video_folder_text.get("1.0", tk.END).rstrip('\n')
