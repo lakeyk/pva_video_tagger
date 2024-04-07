@@ -6,15 +6,19 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import filedialog
 import glob
-from video_coder import file_utils, audio_utils
 from threading import Thread, Lock
+
+sys.path.insert(0, 'C:\\Users\\kelsi\\OneDrive\\Documents\\PVA Video Tagger\\pva_video_tagger\\server')
+
+from video_coder import file_utils, audio_utils
+
 
 def get_video_files(path):
 	video_files = []
 	for r, d, f in os.walk(path):
 		for file in f:
 			extension = None
-			if file[-4:] in audio_utils.SUPPORTED_EXTENSIONS:
+			if file[-4:] in audio_utils.SUPPORTED_EXTENSIONS and file[0] != '.':
 				video_files.append((r, file))
 	return video_files
 
@@ -44,8 +48,9 @@ def run_auto_tagger_on_path(path):
 	add_text(info_text, f"Auto-tagging {file_count} files\n")
 	for i in range(file_count):
 		add_text(info_text, f"{i+1}/{file_count}: {video_files[i][0]}/{video_files[i][1]}\n")
-		result = audio_utils.autotag_file(video_files[i][0], video_files[i][1])
-		add_text(info_text, f"\tAuto-tagged as: {result}\n")
+		text, label = audio_utils.autotag_file(video_files[i][0], video_files[i][1])
+		add_text(info_text, f"\tDetected: {text}\n")
+		add_text(info_text, f"\tAuto-tagged as: {label}\n")
 	add_text(info_text, "\nAuto-tagger complete for all files!\n")
 	update_video_tree_display(video_folder_text.get("1.0", tk.END).rstrip('\n'))
 
@@ -197,11 +202,18 @@ def create_gui():
 
 def process_directory(parent, path):
     for p in os.listdir(path):
+        print(p)
+        print(path)
         abspath = os.path.join(path, p)
         isdir = os.path.isdir(abspath)
+        if 'DS_Store' in abspath:
+            print('break')
+            break
         if not p.startswith('.'):
+            print('inserting')
             oid = video_tree.insert(parent, 'end', text=p, open=False)
         if isdir:
+#            oid = video_tree.insert(parent, 'end', text=p, open=False)
             process_directory(oid, abspath)
 
 def update_video_tree_display(path):

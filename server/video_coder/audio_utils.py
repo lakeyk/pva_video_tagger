@@ -20,9 +20,8 @@ def remove_audio(videos_path, video_file_name):
 		if os.path.exists(base_path):
 			os.rename(base_path, audio_path)
 			try:
-				input_ffmpeg = ffmpeg.input(audio_path)
-				input_video = input_ffmpeg['v']
-				ffmpeg.output(input_video, base_path).run()
+				ffmpeg_command = 'ffmpeg -i \"' + audio_path + '\" -vcodec copy -an \"' + base_path + '\"'
+				os.system(ffmpeg_command)
 
 				lock = Lock()
 				with lock:
@@ -37,6 +36,7 @@ def autotag_file(videos_path, video_file_name):
 	names_dict = names.get_names_dict()
 	r = sr.Recognizer()
 	detected = None
+	text = None
 	if video_file_name[-4:] not in SUPPORTED_EXTENSIONS:
 		return detected
 	base_path = os.path.join(videos_path, video_file_name)
@@ -47,7 +47,7 @@ def autotag_file(videos_path, video_file_name):
 		video.close()
 	else:
 		video.close()
-		return detected
+		return text, detected
 
 	try:
 		with sr.AudioFile(audio_file_name) as source:
@@ -66,7 +66,16 @@ def autotag_file(videos_path, video_file_name):
 						if len(video_file_name) > len(name) and video_file_name[:len(name)] == name:
 							detected = 'Already labeled'
 							break
-						new_file_name = name + '_' + video_file_name
+						new_file_name = name + '_day5_'
+						if "GS" in text or "DS" in text or "Diaz" in text or "yes" in text:
+							new_file_name = new_file_name + 'GS_'
+						if "Slalom" in text or "slalom" in text or "salon" in text or "swallower" in text or "song" in text or "Sloan" in text:
+							new_file_name = new_file_name + 'SL_'
+						if "run 2" in text or "Run 2" in text or "Run two" in text or "run two" in text or "run to" in text:
+							new_file_name = new_file_name + 'run2_'
+						if "run 1" in text or "Run 1" in text or "Run one" in text or "run one" in text or "run won" in text:
+							new_file_name = new_file_name + 'run1_'
+						new_file_name = new_file_name + video_file_name
 						os.rename(base_path, os.path.join(videos_path, new_file_name))
 						detected = name
 						break
@@ -74,4 +83,4 @@ def autotag_file(videos_path, video_file_name):
 		print('Issue running autotagger')
 		print(e)
 	os.remove(audio_file_name)
-	return detected
+	return text, detected
